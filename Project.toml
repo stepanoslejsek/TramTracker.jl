@@ -3,7 +3,13 @@ uuid = "290a9fed-e6f2-4c3b-acfb-480bf077e5e1"
 authors = ["Stepan Oslejsek"]
 version = "1.0.0-DEV"
 
+[deps]
+GeoIO = "f5a160d5-e41d-4189-8b61-d57781c419e3"
+GeoStats = "dcc97b0b-8ce5-5539-9008-bb190f959ef6"
+
 [compat]
+GeoIO = "1.20.7"
+GeoStats = "0.81.6"
 julia = "1.6.7"
 
 [extras]
