@@ -6,10 +6,20 @@ function dist(p₁::T, p₂::T) where {T <: Meshes.Point}
         (p₁.coords.lon.val, p₁.coords.lat.val), (p₂.coords.lon.val, p₂.coords.lat.val))
 end
 
-function dist(p₁::TramTrackPoint, p₂::TramTrackPoint)
-    return haversine(
-        (p₁.loaction.coords.lon.val, p₁.location.coords.lat.val), (
-            p₂.location.coords.lon.val, p₂.location.coords.lat.val))
+function dist(p::T, a::T, b::T ) where {T <: Meshes.Point}
+    # IMPORTANT: Not using Haversine formula for computing the distance
+    # Using straightforward formula as the error is small
+    ab = b - a
+    ap = p - a
+    t = dot(ap, ab) / dot(ab, ab)
+    if t < 0
+        return norm(p - a).val
+    elseif t > 1
+        return norm(p - b).val
+    else
+        proj = a + t .* ab
+        return norm(p - proj).val
+    end
 end
 
 function load_tram_map(path::String)
@@ -31,8 +41,10 @@ function create_graph(gt::GeoTable)
 
     # Map points to integer indices
     points_mapping = Dict(track_nodes .=> 1:N)
+    point2int = Dict(track_nodes .=> 1:N)
+    int2point = Dict(1:N .=> track_nodes)
 
-    # Preallocate arrays for sparse triplets
+    # Arrays for sparse triplets
     I = Int[]
     J = Int[]
     V = Float64[]
@@ -46,7 +58,6 @@ function create_graph(gt::GeoTable)
             push!(V, dist(points[i], points[i+1]))
         end
     end
-
     # Construct sparse adjacency matrix
     return sparse(I, J, V, N, N)
 end
@@ -103,3 +114,4 @@ function sort_track_segments(gt::GeoTable)
 end
 
 Base.getindex(M::SparseMatrixCSC, r::T, c::T) where {T <: Meshes.Point} = M[findall(x->x==), findall()]
+Base.getindex(D::Dict{Int, T}, I::CartesianIndex) where {T <: Meshes.Point} = D[I.I[1]], D[I.I[2]]
