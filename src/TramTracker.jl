@@ -4,6 +4,6 @@ module TramTracker
 include("types.jl")
 include("utils.jl")
 
-export TramTrackerAlgo
+export TramTrackerAlgo, TramTrackPoint, load_tram_map
 
 end
